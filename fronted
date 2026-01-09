@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Messenger</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Login/Register Screen */
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-box {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-header svg {
+            width: 60px;
+            height: 60px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .auth-header h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #fcc;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
+
+        .btn-secondary {
+            background: #e1e8ed;
+            color: #657786;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d8dd;
+        }
+
+        /* Chat Screen */
+        .chat-container {
+            display: none;
+            height: 100vh;
+            background: #f5f8fa;
+        }
+
+        .chat-layout {
+            display: flex;
+            height: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background: white;
+            border-right: 1px solid #e1e8ed;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .user-info span {
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 15px;
+        }
+
+        .search-box input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            width: 18px;
+            height: 18px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .users-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e1e8ed;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-item:hover {
+            background: #f5f8fa;
+        }
+
+        .user-item.active {
+            background: #e8f4ff;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: #657786;
+        }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f5f8fa;
+        }
+
+        .chat-header {
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-header .user-avatar {
+            background: #764ba2;
+        }
+
+        .chat-header .user-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+        }
+
+        .message.sent {
+            justify-content: flex-end;
+        }
+
+        .message.received {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 60%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+
+        .message.sent .message-bubble {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.received .message-bubble {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            margin-top: 4px;
+            opacity: 0.7;
+        }
+
+        .chat-empty {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #657786;
+        }
+
+        .chat-empty svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .chat-empty p {
+            font-size: 18px;
+        }
+
+        /* Input Area */
+        .input-area {
+            background: white;
+            padding: 20px;
+            border-top: 1px solid #e1e8ed;
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid #e1e8ed;
+            border-radius: 25px;
+            font-size: 15px;
+        }
+
+        .input-area input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            width: 48px;
+            height: 48px;
+            background: #667eea;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .send-btn:hover {
+            background: #5568d3;
+            transform: scale(1.1);
+        }
+
+        .send-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .show {
+            display: block !important;
+        }
+
+        .show-flex {
+            display: flex !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="auth-container">
+        <div class="auth-box">
+            <div class="auth-header">
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                </svg>
+                <h1>Web Messenger</h1>
+            </div>
+            <div id="loginError" class="error-message hidden"></div>
+            <div class="input-group">
+                <input type="text" id="loginUsername" placeholder="Username">
+            </div>
+            <div class="input-group">
+                <input type="password" id="loginPassword" placeholder="Parol">
+            </div>
+            <button class="btn btn-primary" onclick="login()">Kirish</button>
+            <button class="btn btn-secondary" onclick="showRegister()">Ro'yxatdan o'tish</button>
+        </div>
+    </div>
+
+    <!-- Register Screen -->
+    <div id="registerScreen" class="auth-container hidden">
+        <div class="auth-box">
+            <div class="auth-header">
+                <h1>Ro'yxatdan o'tish</h1>
+            </div>
+            <div id="registerError" class="error-message hidden"></div>
+            <div class="input-group">
+                <input type="text" id="registerUsername" placeholder="Username (noyob)">
+            </div>
+            <div class="input-group">
+                <input type="password" id="registerPassword" placeholder="Parol">
+            </div>
+            <button class="btn btn-primary" onclick="register()">Ro'yxatdan o'tish</button>
+            <button class="btn btn-secondary" onclick="showLogin()">Orqaga</button>
+        </div>
+    </div>
+
+    <!-- Chat Screen -->
+    <div id="chatScreen" class="chat-container">
+        <div class="chat-layout">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div class="user-info">
+                        <span id="currentUsername"></span>
+                        <button class="logout-btn" onclick="logout()">Chiqish</button>
+                    </div>
+                    <div class="search-box">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        </svg>
+                        <input type="text" id="searchUsers" placeholder="Qidirish..." oninput="filterUsers()">
+                    </div>
+                </div>
+                <div id="usersList" class="users-list"></div>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="chat-area">
+                <div id="chatEmpty" class="chat-empty">
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                    </svg>
+                    <p>Suhbatni boshlash uchun foydalanuvchini tanlang</p>
+                </div>
+                <div id="chatActive" class="hidden" style="display: flex; flex-direction: column; flex: 1;">
+                    <div class="chat-header">
+                        <div class="user-avatar" id="chatAvatar"></div>
+                        <div class="user-name" id="chatUsername"></div>
+                    </div>
+                    <div id="messagesArea" class="messages-area"></div>
+                    <div class="input-area">
+                        <input type="text" id="messageInput" placeholder="Xabar yozing..." onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button class="send-btn" onclick="sendMessage()">
+                            <svg fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // O'zingizning PythonAnywhere URL ini qo'ying
+        const API_URL = 'https://muzaffar12.pythonanywhere.com';
+        
+        let currentUser = null;
+        let selectedUser = null;
+        let allUsers = [];
+        let messageInterval = null;
+
+        // Show/Hide screens
+        function showLogin() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('registerScreen').classList.add('hidden');
+            document.getElementById('loginError').classList.add('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('registerScreen').classList.remove('hidden');
+            document.getElementById('registerError').classList.add('hidden');
+        }
+
+        function showChat() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('registerScreen').classList.add('hidden');
+            document.getElementById('chatScreen').style.display = 'block';
+            document.getElementById('currentUsername').textContent = currentUser.username;
+            loadUsers();
+        }
+
+        // Register
+        async function register() {
+            const username = document.getElementById('registerUsername').value.trim();
+            const password = document.getElementById('registerPassword').value.trim();
+            const errorDiv = document.getElementById('registerError');
+
+            if (!username || !password) {
+                errorDiv.textContent = 'Username va parol to\'ldirilishi shart';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentUser = { username, token: data.token };
+                    showChat();
+                } else {
+                    errorDiv.textContent = data.error || 'Ro\'yxatdan o\'tishda xatolik';
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Server bilan bog\'lanishda xatolik';
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        // Login
+        async function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorDiv = document.getElementById('loginError');
+
+            if (!username || !password) {
+                errorDiv.textContent = 'Username va parol to\'ldirilishi shart';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentUser = { username, token: data.token };
+                    showChat();
+                } else {
+                    errorDiv.textContent = data.error || 'Kirish xato';
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Server bilan bog\'lanishda xatolik';
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        // Logout
+        function logout() {
+            currentUser = null;
+            selectedUser = null;
+            clearInterval(messageInterval);
+            showLogin();
+        }
+
+        // Load users
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_URL}/api/users`, {
+                    headers: { 'Authorization': `Bearer ${currentUser.token}` }
+                });
+                const data = await response.json();
+                allUsers = data.users.filter(u => u !== currentUser.username);
+                renderUsers();
+            } catch (error) {
+                console.error('Foydalanuvchilarni yuklashda xatolik');
+            }
+        }
+
+        // Render users
+        function renderUsers() {
+            const searchQuery = document.getElementById('searchUsers').value.toLowerCase();
+            const filteredUsers = allUsers.filter(u => u.toLowerCase().includes(searchQuery));
+            
+            const usersList = document.getElementById('usersList');
+            
+            if (filteredUsers.length === 0) {
+                usersList.innerHTML = '<div class="empty-state">Foydalanuvchilar topilmadi</div>';
+                return;
+            }
+
+            usersList.innerHTML = filteredUsers.map(user => `
+                <div class="user-item ${selectedUser?.username === user ? 'active' : ''}" onclick="selectUser('${user}')">
+                    <div class="user-avatar">${user[0].toUpperCase()}</div>
+                    <div class="user-name">${user}</div>
+                </div>
+            `).join('');
+        }
+
+        // Filter users
+        function filterUsers() {
+            renderUsers();
+        }
+
+        // Select user
+        function selectUser(username) {
+            selectedUser = { username };
+            renderUsers();
+            
+            document.getElementById('chatEmpty').classList.add('hidden');
+            document.getElementById('chatActive').style.display = 'flex';
+            document.getElementById('chatAvatar').textContent = username[0].toUpperCase();
+            document.getElementById('chatUsername').textContent = username;
+            
+            loadMessages();
+            clearInterval(messageInterval);
+            messageInterval = setInterval(loadMessages, 2000);
+        }
+
+        // Load messages
+        async function loadMessages() {
+            if (!selectedUser) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/messages/${selectedUser.username}`, {
+                    headers: { 'Authorization': `Bearer ${currentUser.token}` }
+                });
+                const data = await response.json();
+                renderMessages(data.messages || []);
+            } catch (error) {
+                console.error('Xabarlarni yuklashda xatolik');
+            }
+        }
+
+        // Render messages
+        function renderMessages(messages) {
+            const messagesArea = document.getElementById('messagesArea');
+            messagesArea.innerHTML = messages.map(msg => {
+                const isSent = msg.from_user === currentUser.username;
+                const time = new Date(msg.timestamp).toLocaleTimeString('uz-UZ', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                return `
+                    <div class="message ${isSent ? 'sent' : 'received'}">
+                        <div class="message-bubble">
+                            <div>${msg.message}</div>
+                            <div class="message-time">${time}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        // Send message
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || !selectedUser) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/send`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}`
+                    },
+                    body: JSON.stringify({
+                        to_user: selectedUser.username,
+                        message: message
+                    })
+                });
+
+                if (response.ok) {
+                    input.value = '';
+                    loadMessages();
+                }
+            } catch (error) {
+                console.error('Xabar yuborishda xatolik');
+            }
+        }
+    </script>
+</body>
+</html>
